@@ -30,26 +30,26 @@ function Credits() {
     {
       id: 'basic',
       name: 'Basic',
-      credits: 100,
+      credits: 5,
       price: 10,
       amount: 1000,
-      description: 'Best for personal use'
+      description: 'Best for trying out'
     },
     {
       id: 'advanced',
       name: 'Advanced',
-      credits: 500,
+      credits: 20,
       price: 50,
       amount: 5000,
-      description: 'Best for business use'
+      description: 'Best for regular users'
     },
     {
       id: 'business',
       name: 'Business',
-      credits: 2000,
-      price: 250,
-      amount: 25000,
-      description: 'Best for enterprise use'
+      credits: 40,
+      price: 100,
+      amount: 10000,
+      description: 'Best for power users'
     }
   ];
 
@@ -82,7 +82,7 @@ function Credits() {
 
       // Initialize Razorpay
       const options = {
-        key: 'rzp_test_ivwVXJRPNyNqz3',
+        key: 'rzp_live_8Aw5WIVkdvysi7',
         amount: amount,
         currency: "INR",
         name: "Imagifine",
