@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { 
+  BrowserRouter as Router, 
+  Routes, 
+  Route, 
+  Navigate, 
+  useNavigate 
+} from 'react-router-dom'
 import AuthModal from './components/Auth/AuthModal'
 import CreativeAI from './components/CreativeAI/CreativeAI'
 import Header from './components/Header/Header'
@@ -7,13 +13,34 @@ import HowItWorks from './components/HowItWorks/HowItWorks'
 import ImageGallery from './components/ImageGallery/ImageGallery'
 import Testimonials from './components/Testimonials/Testimonials'
 import ImageGenerator from './components/ImageGenerator/ImageGenerator'
+import Credits from './components/Credits/Credits'
 import Navbar from './components/Navbar/Navbar'
 
 import './styles/globals.css'
 
-function App() {
+// Create a wrapper component that has access to navigation
+function AppContent() {
+  const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const isAuthenticated = !!localStorage.getItem('currentUser')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLoginSuccess = (userData) => {
+    console.log('Login success data:', userData);
+    
+    if (userData.token) {
+      localStorage.setItem('token', userData.token);
+      setIsAuthenticated(true);
+      setShowAuthModal(false);
+      window.location.href = '/generate';
+    } else {
+      console.error('No token in login success data');
+    }
+  }
 
   const LandingPage = () => (
     <>
@@ -26,43 +53,66 @@ function App() {
     </>
   )
 
-  const handleLoginSuccess = (user) => {
-    localStorage.setItem('currentUser', JSON.stringify(user))
-    setShowAuthModal(false)
-    window.location.href = '/generate'
-  }
-
   const UnauthorizedRedirect = () => {
     useEffect(() => {
-      setShowAuthModal(true)
-    }, [])
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setShowAuthModal(true);
+      }
+    }, []);
     
-    return <Navigate to="/" replace />
+    return <Navigate to="/" replace />;
   }
 
+  const ProtectedRoute = ({ children }) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return <UnauthorizedRedirect />;
+    }
+    return (
+      <>
+        <Navbar />
+        {children}
+      </>
+    );
+  };
+
+  return (
+    <div className="app">
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route 
+          path="/generate" 
+          element={
+            <ProtectedRoute>
+              <ImageGenerator />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/credits" 
+          element={
+            <ProtectedRoute>
+              <Credits />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    </div>
+  )
+}
+
+// Main App component
+function App() {
   return (
     <Router>
-      <div className="app">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route 
-            path="/generate" 
-            element={
-              isAuthenticated ? (
-                <ImageGenerator />
-              ) : (
-                <UnauthorizedRedirect />
-              )
-            } 
-          />
-        </Routes>
-
-        <AuthModal 
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onLoginSuccess={handleLoginSuccess}
-        />
-      </div>
+      <AppContent />
     </Router>
   )
 }

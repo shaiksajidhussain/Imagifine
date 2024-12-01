@@ -14,6 +14,7 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     username: '',
     otp: ''
   })
+  const [error, setError] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,18 +33,26 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         });
 
         const data = await response.json();
+        console.log('Login response:', data);
         
         if (response.ok) {
-          localStorage.setItem('token', data.token);
-          onLoginSuccess(data.user);
-          onClose();
-          setFormData({ email: '', password: '', username: '', otp: '' });
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            console.log('Token stored:', localStorage.getItem('token'));
+            
+            onLoginSuccess({ ...data.user, token: data.token });
+            onClose();
+            setFormData({ email: '', password: '', username: '', otp: '' });
+          } else {
+            console.error('No token in response:', data);
+            alert('Login failed: No token received');
+          }
         } else {
           alert(data.message || 'Login failed');
         }
       } catch (error) {
+        console.error('Login error:', error);
         alert('Error during login');
-        console.error(error);
       }
     } else {
       if (showOtpField) {
@@ -113,6 +122,29 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       [e.target.name]: e.target.value
     })
   }
+
+  const handleLogin = async (credentials) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+      });
+
+      const data = await response.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        onLoginSuccess(data);
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error.message);
+    }
+  };
 
   return (
     <Modal

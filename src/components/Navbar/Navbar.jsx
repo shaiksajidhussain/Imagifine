@@ -18,12 +18,29 @@ function Navbar() {
   const fetchCurrentUser = async () => {
     const token = localStorage.getItem('token')
     if (token) {
-      const userData = await fetchUserData()
-      if (userData) {
-        setCurrentUser(userData)
-      } else {
-        localStorage.removeItem('token')
-        setCurrentUser(null)
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/user', { 
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+          // Update credits in store if needed
+          if (userData.credits !== credits) {
+            fetchUserData();
+          }
+        } else {
+          localStorage.removeItem('token');
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        localStorage.removeItem('token');
+        setCurrentUser(null);
       }
     }
   }
@@ -55,11 +72,24 @@ function Navbar() {
     setCurrentUser(null)
     handleMenuClose()
     navigate('/')
+    window.location.reload()
   }
 
-  const handleLoginSuccess = (userData) => {
-    localStorage.setItem('token', userData.token)
-    fetchUserData() // Fetch fresh user data after login
+  const handleLoginSuccess = async (userData) => {
+    if (userData.token) {
+      localStorage.setItem('token', userData.token)
+      await fetchCurrentUser() // Fetch fresh user data after login
+    
+    }
+  }
+
+  const handleGetStartedClick = () => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      navigate('/generate') // If already logged in, go to generate page
+    } else {
+      setIsModalOpen(true) // If not logged in, show login modal
+    }
   }
 
   return (
@@ -148,7 +178,7 @@ function Navbar() {
         ) : (
           <button 
             className="get-started-btn"
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleGetStartedClick}
           >
             Get Started <span className="sparkle">✨</span>
           </button>
