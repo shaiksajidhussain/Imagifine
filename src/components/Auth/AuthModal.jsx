@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Modal from 'react-modal'
 import './AuthModal.css'
+import config from '../../config/config'
 
 Modal.setAppElement('#root')
 
@@ -8,6 +9,7 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true)
   const [showOtpField, setShowOtpField] = useState(false)
   const [userId, setUserId] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -18,10 +20,11 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
     
     if (isLogin) {
       try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        const response = await fetch(`${config.active.apiUrl}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -53,12 +56,14 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       } catch (error) {
         console.error('Login error:', error);
         alert('Error during login');
+      } finally {
+        setIsLoading(false)
       }
     } else {
       if (showOtpField) {
         // Handle OTP verification
         try {
-          const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+          const response = await fetch(`${config.active.apiUrl}/api/auth/verify-otp`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -83,11 +88,13 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         } catch (error) {
           alert('Error during OTP verification');
           console.error(error);
+        } finally {
+          setIsLoading(false)
         }
       } else {
         // Handle Registration
         try {
-          const response = await fetch('http://localhost:5000/api/auth/register', {
+          const response = await fetch(`${config.active.apiUrl}/api/auth/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -111,6 +118,8 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         } catch (error) {
           alert('Error during registration');
           console.error(error);
+        } finally {
+          setIsLoading(false)
         }
       }
     }
@@ -125,7 +134,7 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${config.active.apiUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -241,8 +250,12 @@ function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             </div>
           )}
 
-          <button type="submit" className="submit-btn">
-            {isLogin ? 'Sign In' : (showOtpField ? 'Verify OTP' : 'Create Account')}
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? (
+              isLogin ? 'Signing In...' : (showOtpField ? 'Verifying...' : 'Creating...')
+            ) : (
+              isLogin ? 'Sign In' : (showOtpField ? 'Verify OTP' : 'Create Account')
+            )}
           </button>
         </form>
       </div>

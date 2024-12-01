@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import config from '../config/config'
 
 const useUserStore = create((set) => ({
   credits: 0,
@@ -10,7 +11,7 @@ const useUserStore = create((set) => ({
     if (!token) return
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/user', {
+      const response = await fetch(`${config.active.apiUrl}/api/auth/user`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -32,7 +33,7 @@ const useUserStore = create((set) => ({
     if (!token) return
 
     try {
-      const response = await fetch('http://localhost:5000/api/credits/update', {
+      const response = await fetch(`${config.active.apiUrl}/api/credits/update`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

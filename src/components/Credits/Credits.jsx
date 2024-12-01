@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import useUserStore from '../../store/userStore'
 import Navbar from '../Navbar/Navbar'
 import './Credits.css'
+import config from '../../config/config'
 
 function Credits() {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ function Credits() {
 
     try {
       // Create order
-      const orderRes = await fetch('http://localhost:5000/api/credits/create-order', {
+      const orderRes = await fetch(`${config.active.apiUrl}/api/credits/create-order`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -90,7 +91,7 @@ function Credits() {
         order_id: orderId,
         handler: async function (response) {
           try {
-            const verifyRes = await fetch('http://localhost:5000/api/credits/verify-payment', {
+            const verifyRes = await fetch(`${config.active.apiUrl}/api/credits/verify-payment`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,

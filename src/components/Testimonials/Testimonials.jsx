@@ -1,24 +1,25 @@
+import { Link } from 'react-router-dom'
 import './Testimonials.css'
 
 function Testimonials() {
   const testimonials = [
     {
-      name: "Donald Jackman",
-      role: "Graphic Designer",
+      name: "Praneeth Joshi",
+      role: "UI / UX Designer",
       image: "/testimonial1.jpg",
       rating: 5,
       text: "I've been using Imagifine for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier."
     },
     {
-      name: "Richard Nelson",
-      role: "Content Creator",
+      name: "Bharath Reddy",
+      role: "Data Analyst",
       image: "/testimonial2.jpg",
       rating: 5,
       text: "I've been using Imagifine for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier."
     },
     {
-      name: "James Washington",
-      role: "Co-Founder",
+      name: "Manoj Shaik",
+      role: "Software Engineer",
       image: "/testimonial3.jpg",
       rating: 5,
       text: "I've been using Imagifine for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier."
@@ -36,11 +37,7 @@ function Testimonials() {
         {testimonials.map((testimonial, index) => (
           <div key={index} className="testimonial-card animate-slide-up" style={{animationDelay: `${index * 0.2}s`}}>
             <div className="testimonial-content">
-              <img 
-                src={testimonial.image} 
-                alt={testimonial.name} 
-                className="testimonial-image"
-              />
+       
               <h3>{testimonial.name}</h3>
               <p className="role">{testimonial.role}</p>
               <div className="rating">
@@ -56,9 +53,11 @@ function Testimonials() {
 
       <div className="cta-section animate-fade-in">
         <h2>See the magic. Try now</h2>
-        <button className="generate-button">
+        <Link to="/generate">
+          <button className="generate-button">
           Generate Images <span className="sparkle">✨</span>
         </button>
+        </Link>
       </div>
     </section>
   )

@@ -5,6 +5,7 @@ import { Settings, Logout, Person, CreditCard } from '@mui/icons-material'
 import useUserStore from '../../store/userStore'
 import './Navbar.css'
 import AuthModal from '../Auth/AuthModal'
+import config from '../../config/config'
 
 function Navbar() {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ function Navbar() {
     const token = localStorage.getItem('token')
     if (token) {
       try {
-        const response = await fetch('http://localhost:5000/api/auth/user', { 
+        const response = await fetch(`${config.active.apiUrl}/api/auth/user`, { 
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
