@@ -30,7 +30,7 @@ const useUserStore = create((set) => ({
   // Update credits
   updateCredits: async (newCredits) => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) return false
 
     try {
       const response = await fetch(`${config.active.apiUrl}/api/credits/update`, {
@@ -44,9 +44,12 @@ const useUserStore = create((set) => ({
 
       if (response.ok) {
         set({ credits: newCredits })
+        return true
       }
+      return false
     } catch (error) {
       console.error('Error updating credits:', error)
+      return false
     }
   }
 }))

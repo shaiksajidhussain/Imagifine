@@ -33,6 +33,15 @@ function ImageGenerator() {
     setImageUrl('')
 
     try {
+      // First, try to update credits
+      const newCredits = credits - 1
+      const updateResponse = await updateCredits(newCredits)
+      
+      if (!updateResponse) {
+        throw new Error('Failed to update credits')
+      }
+
+      // Then proceed with image generation
       const form = new FormData()
       form.append('prompt', prompt)
 
@@ -48,6 +57,8 @@ function ImageGenerator() {
       )
 
       if (!response.ok) {
+        // If image generation fails, restore the credit
+        await updateCredits(credits)
         throw new Error('Failed to generate image')
       }
 
@@ -56,10 +67,10 @@ function ImageGenerator() {
       const imageUrl = URL.createObjectURL(blob)
       setImageUrl(imageUrl)
 
-      // Update credits after successful generation
-      await updateCredits(credits - 1)
     } catch (err) {
-      setError('Error generating image: ' + err.message)
+      setError('Error: ' + err.message)
+      // If any error occurs, ensure we refresh the credit count
+      await fetchUserData()
     } finally {
       setLoading(false)
     }
