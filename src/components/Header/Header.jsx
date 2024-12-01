@@ -1,4 +1,5 @@
 import './Header.css'
+import { Link } from 'react-router-dom'
 
 function Header() {
   return (
@@ -10,19 +11,12 @@ function Header() {
         </video>
       </div>
 
-      <nav className="nav">
-        <div className="logo">
-          Imagi<span>fine</span>
-        </div>
-        <button className="nav-button">Get Started</button>
-      </nav>
-      
       <div className="hero">
         <h1 className="hero-title">
           Turn text to <span className="highlight">image</span> in seconds.
         </h1>
         <p className="subtitle">Create stunning AI-generated images from text descriptions instantly</p>
-        <button className="primary-button">Generate Images</button>
+        <Link to="/generate"><button className="primary-button">Generate Images</button></Link>
       </div>
     </header>
   )
