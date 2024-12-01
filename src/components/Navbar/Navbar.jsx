@@ -154,12 +154,7 @@ function Navbar() {
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}
               anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-              <MenuItem onClick={() => navigate('/profile')}>
-                <ListItemIcon>
-                  <Person sx={{ color: 'white' }} fontSize="small" />
-                </ListItemIcon>
-                Profile
-              </MenuItem>
+          
               <MenuItem onClick={() => navigate('/credits')}>
                 <ListItemIcon>
                   <CreditCard sx={{ color: 'white' }} fontSize="small" />

@@ -4,25 +4,25 @@ import './Testimonials.css'
 function Testimonials() {
   const testimonials = [
     {
+      name: "David Manoj",
+      role: "Software Engineer",
+      image: "/testimonial1.jpg", 
+      rating: 5,
+      text: "Imagifine has revolutionized my creative workflow. The AI generates stunning images that serve as perfect inspiration for my digital art projects. The quality and variety are incredible!"
+    },
+    {
       name: "Praneeth Joshi",
       role: "UI / UX Designer",
-      image: "/testimonial1.jpg",
-      rating: 5,
-      text: "I've been using Imagifine for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier."
+      image: "/testimonial2.jpg",
+      rating: 5, 
+      text: "As a marketing professional, I need high-quality visuals quickly. Imagifine delivers exactly what I need - the AI understands complex prompts and produces professional-grade images in seconds."
     },
     {
       name: "Bharath Reddy",
       role: "Data Analyst",
-      image: "/testimonial2.jpg",
-      rating: 5,
-      text: "I've been using Imagifine for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier."
-    },
-    {
-      name: "Manoj Shaik",
-      role: "Software Engineer",
       image: "/testimonial3.jpg",
       rating: 5,
-      text: "I've been using Imagifine for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier."
+      text: "I create content daily for multiple social platforms, and Imagifine has become my secret weapon. The image quality is consistently amazing, and the interface is so intuitive to use."
     }
   ]
 
