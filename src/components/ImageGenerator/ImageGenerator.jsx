@@ -12,6 +12,7 @@ function ImageGenerator() {
   const [imageUrl, setImageUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [isFullScreen, setIsFullScreen] = useState(false)
   
   const { credits, fetchUserData, updateCredits } = useUserStore()
   
@@ -71,6 +72,10 @@ function ImageGenerator() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen)
   }
 
   return (
@@ -134,7 +139,12 @@ function ImageGenerator() {
               className="result-container"
             >
               <div className="image-wrapper">
-                <img src={imageUrl} alt={prompt} className="generated-image" />
+                <img 
+                  src={imageUrl} 
+                  alt={prompt} 
+                  className="generated-image"
+                  onClick={toggleFullScreen} 
+                />
                 <button onClick={handleDownload} className="download-button">
                   <FiDownload /> 
                 </button>
@@ -143,6 +153,21 @@ function ImageGenerator() {
           )}
         </motion.div>
       </section>
+
+      {/* Full Screen Modal */}
+      {isFullScreen && (
+        <div className="image-modal" onClick={toggleFullScreen}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="close-button" onClick={toggleFullScreen}>×</button>
+            <img 
+              src={imageUrl} 
+              alt={prompt} 
+              className="modal-image"
+            />
+            <p className="modal-prompt">{prompt}</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

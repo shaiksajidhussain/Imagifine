@@ -230,6 +230,12 @@
   object-fit: cover;
   border-radius: 8px;
   display: block;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.generated-image:hover {
+  transform: scale(1.02);
 }
 
 .download-button {
@@ -300,4 +306,58 @@
 .generate-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90vh;
+  cursor: default;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.close-button {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 36px;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1001;
+}
+
+.close-button:hover {
+  color: #ddd;
+}
+
+.modal-prompt {
+  color: white;
+  text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
 } 
