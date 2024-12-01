@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FiDownload, FiImage } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import useUserStore from '../../store/userStore'
 import Navbar from '../Navbar/Navbar'
 import './ImageGenerator.css'
 
@@ -12,13 +13,20 @@ function ImageGenerator() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
-
-
-
+  const { credits, fetchUserData, updateCredits } = useUserStore()
+  
   const API_KEY = 'c43e415ba9eafc78d847a58eda7a57af9e1aa597408b1252be2d066fc6da1b063f23fa1db1e5601c348a1f03160b3b80'
 
+  useEffect(() => {
+    fetchUserData()
+  }, [])
+
   const generateImage = async () => {
+    if (credits <= 0) {
+      setError('Not enough credits! Please purchase more credits to continue.')
+      return
+    }
+
     setLoading(true)
     setError(null)
     setImageUrl('')
@@ -46,6 +54,9 @@ function ImageGenerator() {
       const blob = new Blob([buffer])
       const imageUrl = URL.createObjectURL(blob)
       setImageUrl(imageUrl)
+
+      // Update credits after successful generation
+      await updateCredits(credits - 1)
     } catch (err) {
       setError('Error generating image: ' + err.message)
     } finally {
@@ -75,6 +86,10 @@ function ImageGenerator() {
           animate={{ opacity: 1, y: 0 }}
           className="generator-container"
         >
+          <div className="credits-display">
+            Credits remaining: {credits}
+          </div>
+
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -89,7 +104,7 @@ function ImageGenerator() {
             />
             <button
               onClick={generateImage}
-              disabled={loading || !prompt}
+              disabled={loading || !prompt || credits <= 0}
               className="generate-button"
             >
               {loading ? (

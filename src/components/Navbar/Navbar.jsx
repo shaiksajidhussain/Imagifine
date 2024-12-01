@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Menu, MenuItem, Divider, ListItemIcon } from '@mui/material'
 import { Settings, Logout, Person, CreditCard } from '@mui/icons-material'
+import useUserStore from '../../store/userStore'
 import './Navbar.css'
 import AuthModal from '../Auth/AuthModal'
 
@@ -9,8 +10,27 @@ function Navbar() {
   const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('currentUser')))
+  const [currentUser, setCurrentUser] = useState(null)
   const [scrolled, setScrolled] = useState(false)
+  const { credits, fetchUserData } = useUserStore()
+
+  // Fetch user data function
+  const fetchCurrentUser = async () => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      const userData = await fetchUserData()
+      if (userData) {
+        setCurrentUser(userData)
+      } else {
+        localStorage.removeItem('token')
+        setCurrentUser(null)
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchCurrentUser()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,10 +51,15 @@ function Navbar() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser')
+    localStorage.removeItem('token')
     setCurrentUser(null)
     handleMenuClose()
     navigate('/')
+  }
+
+  const handleLoginSuccess = (userData) => {
+    localStorage.setItem('token', userData.token)
+    fetchUserData() // Fetch fresh user data after login
   }
 
   return (
@@ -46,14 +71,14 @@ function Navbar() {
         
         {currentUser ? (
           <div className="user-profile">
-            <div className="credits">Credits left: 4</div>
+            <div className="credits">Credits left: {credits}</div>
             <div 
               className="profile-info"
               onClick={handleMenuClick}
             >
-              Hi {currentUser.name}
+              Hi {currentUser.username}
               <img 
-                src={`https://ui-avatars.com/api/?name=${currentUser.name}&background=random`} 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username)}&background=random`} 
                 alt="Profile" 
                 className="avatar"
               />
@@ -133,7 +158,7 @@ function Navbar() {
       <AuthModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onLoginSuccess={setCurrentUser}
+        onLoginSuccess={handleLoginSuccess}
       />
     </nav>
   )
