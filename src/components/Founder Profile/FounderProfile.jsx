@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import styles from "./FounderProfile.module.css";
-import Navbar from "../text-to-image/src/components/Navbar/Navbar";
+import Navbar from "../Navbar/Navbar";
+
 
 const FounderProfile = () => {
   return (
