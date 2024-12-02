@@ -13,11 +13,25 @@ function Credits() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Check if script is already loaded
+    if (document.getElementById('razorpay-script')) {
+      return;
+    }
+    
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.id = 'razorpay-script'; // Add an ID to check for existence
     script.async = true;
     document.body.appendChild(script);
-  }, []);
+
+    // Cleanup function
+    return () => {
+      const existingScript = document.getElementById('razorpay-script');
+      if (existingScript) {
+        document.body.removeChild(existingScript);
+      }
+    };
+  }, []); // Empty dependency array as we only want this to run once
 
   useEffect(() => {
     const token = localStorage.getItem('token');
