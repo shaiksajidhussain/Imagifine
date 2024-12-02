@@ -22,6 +22,7 @@ import ReplaceBackground from './components/ReplaceBackground/ReplaceBackground'
 
 import './styles/globals.css'
 import ContactUs from './components/Contact Us/ContactUs'
+import FounderProfile from '../../components/FounderProfile'
 
 // Create a wrapper component that has access to navigation
 function AppContent() {
@@ -106,6 +107,7 @@ function AppContent() {
         <Route path="/contact-us" element={<ContactUs />} />
         
         <Route path="/replace-background" element={<ReplaceBackground />} />
+        <Route path="/founder-profile" element={<FounderProfile />} />
       </Routes>
 
       <AuthModal 

@@ -179,6 +179,13 @@ function Navbar() {
                 Buy Credits
               </MenuItem>
 
+              <MenuItem onClick={() => navigate('/founder-profile')}>
+                <ListItemIcon>
+                  <Person sx={{ color: 'white' }} fontSize="small" />
+                </ListItemIcon>
+                Founder Profile
+              </MenuItem>
+
         
 
            
