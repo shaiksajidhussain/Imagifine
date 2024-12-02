@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FiDownload, FiImage } from 'react-icons/fi'
+import { FiDownload, FiImage, FiHelpCircle } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import useUserStore from '../../store/userStore'
@@ -13,10 +13,11 @@ function ImageGenerator() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [isFullScreen, setIsFullScreen] = useState(false)
+  const [showCreditModal, setShowCreditModal] = useState(false)
   
   const { credits, fetchUserData, updateCredits } = useUserStore()
   
-  const API_KEY = 'c43e415ba9eafc78d847a58eda7a57af9e1aa597408b1252be2d066fc6da1b063f23fa1db1e5601c348a1f03160b3b80'
+  const API_KEY = '18c75e9972fc57cc0d65729103c74baeddd1ac312737856c01e1495b65770f383e0b082ad2ba5f7fc99185d48d6c834c'
 
   useEffect(() => {
     fetchUserData()
@@ -24,7 +25,7 @@ function ImageGenerator() {
 
   const generateImage = async () => {
     if (credits <= 0) {
-      setError('Not enough credits! Please purchase more credits to continue.')
+      setShowCreditModal(true)
       return
     }
 
@@ -89,6 +90,22 @@ function ImageGenerator() {
     setIsFullScreen(!isFullScreen)
   }
 
+  const handleHelpClick = () => {
+    window.open('/imagifine', '_blank');
+  };
+
+  const handleBuyCredits = () => {
+    navigate('/credits')
+  }
+
+  const handleGenerateClick = () => {
+    if (credits <= 0) {
+      setShowCreditModal(true)
+      return
+    }
+    generateImage()
+  }
+
   return (
     <div className="generator-page">
       <Navbar />
@@ -111,16 +128,25 @@ function ImageGenerator() {
             animate={{ y: 0, opacity: 1 }}
             className="input-container"
           >
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the image you want to create..."
-              className="prompt-input"
-              maxLength={1000}
-            />
+            <div className="prompt-container">
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe the image you want to create..."
+                className="prompt-input"
+                maxLength={1000}
+              />
+              <div className="help-tooltip">
+                <FiHelpCircle 
+                  className="help-icon" 
+                  onClick={handleHelpClick}
+                />
+                <span className="tooltip-text">Need help with prompts? Ask AI</span>
+              </div>
+            </div>
             <button
-              onClick={generateImage}
-              disabled={loading || !prompt || credits <= 0}
+              onClick={handleGenerateClick}
+              disabled={loading || !prompt}
               className="generate-button"
             >
               {loading ? (
@@ -176,6 +202,25 @@ function ImageGenerator() {
               className="modal-image"
             />
             <p className="modal-prompt">{prompt}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Credit Purchase Modal */}
+      {showCreditModal && (
+        <div className="modal-overlay" onClick={() => setShowCreditModal(false)}>
+          <div className="credit-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-button" onClick={() => setShowCreditModal(false)}>×</button>
+            <h2>Out of Credits</h2>
+            <p>You've run out of credits. Would you like to purchase more to continue generating images?</p>
+            <div className="modal-buttons">
+              <button className="cancel-button" onClick={() => setShowCreditModal(false)}>
+                Cancel
+              </button>
+              <button className="buy-credits-button" onClick={handleBuyCredits}>
+                Buy Credits
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -360,4 +360,123 @@
   padding: 10px;
   background-color: rgba(0, 0, 0, 0.7);
   border-radius: 8px;
+}
+
+.prompt-container {
+  position: relative;
+  width: 100%;
+}
+
+.help-tooltip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.help-icon {
+  cursor: pointer;
+  color: #888;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.help-icon:hover {
+  color: #3B82F6;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: center;
+  padding: 5px 10px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  right: 0;
+  white-space: nowrap;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.help-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.credit-modal {
+  background: #242424;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.credit-modal h2 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.credit-modal p {
+  margin: 0 0 20px 0;
+  color: #888;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #888;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.buy-credits-button {
+  padding: 8px 16px;
+  background: #3B82F6;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.buy-credits-button:hover {
+  background: #2563eb;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: white;
 } 

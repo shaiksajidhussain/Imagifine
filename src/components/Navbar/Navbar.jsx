@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Menu, MenuItem, Divider, ListItemIcon } from '@mui/material'
-import { Settings, Logout, Person, CreditCard } from '@mui/icons-material'
+import { Settings, Logout, Person, CreditCard, ContactSupport, Help } from '@mui/icons-material'
 import useUserStore from '../../store/userStore'
 import './Navbar.css'
 import AuthModal from '../Auth/AuthModal'
 import config from '../../config/config'
+// import TutorialModal from '../Tutorial/TutorialModal'
+import { useTour } from '@reactour/tour';
 
 function Navbar() {
   const navigate = useNavigate()
@@ -14,6 +16,8 @@ function Navbar() {
   const [currentUser, setCurrentUser] = useState(null)
   const [scrolled, setScrolled] = useState(false)
   const { credits, fetchUserData } = useUserStore()
+  const [showTutorial, setShowTutorial] = useState(false)
+  const { setIsOpen } = useTour();
 
   // Fetch user data function
   const fetchCurrentUser = async () => {
@@ -48,7 +52,12 @@ function Navbar() {
 
   useEffect(() => {
     fetchCurrentUser()
-  }, [])
+    const tutorialShown = localStorage.getItem('tutorialShown')
+    if (!tutorialShown) {
+      setIsOpen(true)
+      localStorage.setItem('tutorialShown', 'true')
+    }
+  }, [setIsOpen])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,6 +101,7 @@ function Navbar() {
       setIsModalOpen(true) // If not logged in, show login modal
     }
   }
+
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
@@ -155,12 +165,22 @@ function Navbar() {
               anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
           
+              <MenuItem onClick={() => navigate('/contact-us')}>
+                <ListItemIcon>
+                  <ContactSupport sx={{ color: 'white' }} fontSize="small" />
+                </ListItemIcon>
+                Contact Us
+              </MenuItem>
+              
               <MenuItem onClick={() => navigate('/credits')}>
                 <ListItemIcon>
                   <CreditCard sx={{ color: 'white' }} fontSize="small" />
                 </ListItemIcon>
                 Buy Credits
               </MenuItem>
+
+        
+
            
               <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
               <MenuItem onClick={handleLogout}>

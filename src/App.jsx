@@ -15,8 +15,13 @@ import Testimonials from './components/Testimonials/Testimonials'
 import ImageGenerator from './components/ImageGenerator/ImageGenerator'
 import Credits from './components/Credits/Credits'
 import Navbar from './components/Navbar/Navbar'
+import Gemini from './components/Gemini/Gemini'
+
+// import TextInpainting from './components/TextInpainting/TextInpainting'
+import ReplaceBackground from './components/ReplaceBackground/ReplaceBackground'
 
 import './styles/globals.css'
+import ContactUs from './components/Contact Us/ContactUs'
 
 // Create a wrapper component that has access to navigation
 function AppContent() {
@@ -97,6 +102,10 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route path="/imagifine" element={<Gemini />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        
+        <Route path="/replace-background" element={<ReplaceBackground />} />
       </Routes>
 
       <AuthModal 

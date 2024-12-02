@@ -16,7 +16,7 @@ function Header() {
           Turn text to <span className="highlight">image</span> in seconds.
         </h1>
         <p className="subtitle">Create stunning AI-generated images from text descriptions instantly</p>
-        <Link to="/generate"><button className="primary-button">Generate Images</button></Link>
+        <Link to="/generate"><button className="primary-button generate-images-btn">Generate Images</button></Link>
       </div>
     </header>
   )

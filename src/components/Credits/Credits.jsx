@@ -5,12 +5,16 @@ import useUserStore from '../../store/userStore'
 import Navbar from '../Navbar/Navbar'
 import './Credits.css'
 import config from '../../config/config'
+import { FiHelpCircle } from 'react-icons/fi'
 
 function Credits() {
   const navigate = useNavigate();
   const { fetchUserData } = useUserStore();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentId, setPaymentId] = useState(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     // Check if script is already loaded
@@ -45,7 +49,7 @@ function Credits() {
     {
       id: 'basic',
       name: 'Basic',
-      credits: 5,
+      credits: 2,
       price: 10,
       amount: 1000,
       description: 'Best for trying out'
@@ -53,16 +57,16 @@ function Credits() {
     {
       id: 'advanced',
       name: 'Advanced',
-      credits: 20,
-      price: 50,
+      credits: 5,
+      price: 20,
       amount: 5000,
       description: 'Best for regular users'
     },
     {
       id: 'business',
       name: 'Business',
-      credits: 40,
-      price: 100,
+      credits: 10,
+      price: 50,
       amount: 10000,
       description: 'Best for power users'
     }
@@ -76,7 +80,14 @@ function Credits() {
       return;
     }
 
+    // Prevent multiple clicks during processing
+    if (paymentProcessing) {
+      alert('A payment is already in progress. Please wait...');
+      return;
+    }
+
     setLoading(true);
+    setPaymentProcessing(true);
 
     try {
       // Create order
@@ -90,7 +101,7 @@ function Credits() {
       });
 
       if (!orderRes.ok) {
-        throw new Error('Failed to create order');
+        throw new Error('Failed to create order. Please try again later.');
       }
 
       const { orderId, amount } = await orderRes.json();
@@ -105,6 +116,8 @@ function Credits() {
         order_id: orderId,
         handler: async function (response) {
           try {
+            setPaymentId(response.razorpay_payment_id);
+
             const verifyRes = await fetch(`${config.active.apiUrl}/api/credits/verify-payment`, {
               method: 'POST',
               headers: {
@@ -118,15 +131,30 @@ function Credits() {
               })
             });
 
+            if (!verifyRes.ok) {
+              throw new Error('Payment verification failed. Please contact support with Payment ID: ' + response.razorpay_payment_id);
+            }
+
             const data = await verifyRes.json();
             if (data.success) {
               await fetchUserData();
               alert('Payment successful! Credits added to your account.');
               navigate('/');
+            } else {
+              throw new Error('Credits not added. Please contact support with Payment ID: ' + response.razorpay_payment_id);
             }
           } catch (error) {
             console.error('Verification error:', error);
-            alert('Payment verification failed');
+            alert(`Important: Your payment might have been processed but verification failed.\n\n` +
+                  `Please save this Payment ID: ${response.razorpay_payment_id}\n\n` +
+                  `Contact support immediately with this ID to resolve the issue.\n\n` +
+                  `Error: ${error.message}`);
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            setPaymentProcessing(false);
+            setLoading(false);
           }
         },
         prefill: {
@@ -143,10 +171,25 @@ function Credits() {
       razorpay.open();
     } catch (error) {
       console.error('Order creation error:', error);
-      alert('Failed to create order');
+      alert(`Failed to initiate payment: ${error.message}\n\nPlease try again later or contact support if the issue persists.`);
     } finally {
       setLoading(false);
+      // Note: paymentProcessing is cleared in modal.ondismiss
     }
+  };
+
+  // Add cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (paymentId) {
+        // Save failed payment ID to localStorage in case component unmounts during processing
+        localStorage.setItem('lastFailedPaymentId', paymentId);
+      }
+    };
+  }, [paymentId]);
+
+  const handleHelpClick = () => {
+    setShowHelpModal(true);
   };
 
   return (
@@ -154,14 +197,11 @@ function Credits() {
       <Navbar />
       
       <div className="credits-container">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="credits-header"
-        >
+        <div className="credits-header">
           <h1>Choose the plan</h1>
           <p>Select a plan that works best for you</p>
-        </motion.div>
+          <FiHelpCircle className="help-icon" onClick={handleHelpClick} />
+        </div>
 
         <div className="plans-grid">
           {plans.map((plan) => (
@@ -193,6 +233,19 @@ function Credits() {
             </motion.div>
           ))}
         </div>
+
+        {/* Help Modal */}
+        {showHelpModal && (
+          <div className="modal-overlay" onClick={() => setShowHelpModal(false)}>
+            <div className="help-modal" onClick={e => e.stopPropagation()}>
+              <button className="close-button" onClick={() => setShowHelpModal(false)}>×</button>
+              <h2>Need Help?</h2>
+              <p>If you have paid but the credits haven't appeared, please contact us at:</p>
+              <p><strong>Email:</strong> sanjusazid0@gmail.com</p>
+              <p>Include your transaction details and transaction ID.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
