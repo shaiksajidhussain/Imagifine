@@ -3,39 +3,18 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import useUserStore from '../../store/userStore'
 import Navbar from '../Navbar/Navbar'
+import { toast } from 'react-hot-toast'
 import './Credits.css'
-import config from '../../config/config'
 import { FiHelpCircle } from 'react-icons/fi'
+import axios from 'axios'
+import config from '../../config/config'
 
 function Credits() {
   const navigate = useNavigate();
   const { fetchUserData } = useUserStore();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [paymentId, setPaymentId] = useState(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
-
-  useEffect(() => {
-    // Check if script is already loaded
-    if (document.getElementById('razorpay-script')) {
-      return;
-    }
-    
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.id = 'razorpay-script'; // Add an ID to check for existence
-    script.async = true;
-    document.body.appendChild(script);
-
-    // Cleanup function
-    return () => {
-      const existingScript = document.getElementById('razorpay-script');
-      if (existingScript) {
-        document.body.removeChild(existingScript);
-      }
-    };
-  }, []); // Empty dependency array as we only want this to run once
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -50,24 +29,24 @@ function Credits() {
       id: 'basic',
       name: 'Basic',
       credits: 2,
-      price: 10,
-      amount: 1000,
+      price: 2,
+      amount: 200,
       description: 'Best for trying out'
     },
     {
       id: 'advanced',
       name: 'Advanced',
       credits: 5,
-      price: 20,
-      amount: 5000,
+      price: 5,
+      amount: 1000,
       description: 'Best for regular users'
     },
     {
       id: 'business',
       name: 'Business',
       credits: 10,
-      price: 50,
-      amount: 10000,
+      price: 10,
+      amount: 5000,
       description: 'Best for power users'
     }
   ];
@@ -75,118 +54,91 @@ function Credits() {
   const handlePurchase = async (plan) => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login to purchase credits');
+      toast.error('Please login to purchase credits');
       navigate('/');
       return;
     }
 
-    // Prevent multiple clicks during processing
-    if (paymentProcessing) {
-      alert('A payment is already in progress. Please wait...');
-      return;
-    }
-
     setLoading(true);
-    setPaymentProcessing(true);
-
     try {
       // Create order
-      const orderRes = await fetch(`${config.active.apiUrl}/api/credits/create-order`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ planId: plan.id })
-      });
+      const orderRes = await axios.post(
+        `${config.active.apiUrl}/api/credits/create-order`,
+        { planId: plan.id },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
 
-      if (!orderRes.ok) {
-        throw new Error('Failed to create order. Please try again later.');
-      }
-
-      const { orderId, amount } = await orderRes.json();
+      const { orderId, amount, key } = orderRes.data;
 
       // Initialize Razorpay
       const options = {
-        key: 'rzp_live_8Aw5WIVkdvysi7',
-        amount: amount,
+        key,
+        amount,
         currency: "INR",
         name: "Imagifine",
         description: `${plan.credits} Credits Purchase`,
         order_id: orderId,
         handler: async function (response) {
           try {
-            setPaymentId(response.razorpay_payment_id);
-
-            const verifyRes = await fetch(`${config.active.apiUrl}/api/credits/verify-payment`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
+            const verifyRes = await axios.post(
+              `${config.active.apiUrl}/api/credits/verify-payment`,
+              {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature
-              })
-            });
+              },
+              {
+                headers: { Authorization: `Bearer ${token}` }
+              }
+            );
 
-            if (!verifyRes.ok) {
-              throw new Error('Payment verification failed. Please contact support with Payment ID: ' + response.razorpay_payment_id);
-            }
-
-            const data = await verifyRes.json();
-            if (data.success) {
+            if (verifyRes.data.success) {
+              // Show success message
+              toast.success(`Successfully purchased ${plan.credits} credits!`);
+              // Show alert and refresh page after OK is clicked
+              alert(`Successfully purchased ${plan.credits} credits!`);
               await fetchUserData();
-              alert('Payment successful! Credits added to your account.');
-              navigate('/');
-            } else {
-              throw new Error('Credits not added. Please contact support with Payment ID: ' + response.razorpay_payment_id);
+              window.location.reload(); // This will refresh the page
             }
           } catch (error) {
-            console.error('Verification error:', error);
-            alert(`Important: Your payment might have been processed but verification failed.\n\n` +
-                  `Please save this Payment ID: ${response.razorpay_payment_id}\n\n` +
-                  `Contact support immediately with this ID to resolve the issue.\n\n` +
-                  `Error: ${error.message}`);
-          }
-        },
-        modal: {
-          ondismiss: function() {
-            setPaymentProcessing(false);
-            setLoading(false);
+            console.error('Payment verification error:', error);
+            toast.error(error.response?.data?.message || 'Payment verification failed');
+            alert(error.response?.data?.message || 'Payment verification failed');
           }
         },
         prefill: {
-          name: "Test User",
-          email: "test@example.com",
-          contact: "9999999999"
+          email: localStorage.getItem('userEmail') // Add this if you store user email
         },
-        theme: {
-          color: "#3B82F6"
+        notes: {
+          planId: plan.id
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            toast.error('Payment cancelled');
+            alert('Payment cancelled');
+          }
         }
       };
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
+
     } catch (error) {
       console.error('Order creation error:', error);
-      alert(`Failed to initiate payment: ${error.message}\n\nPlease try again later or contact support if the issue persists.`);
-    } finally {
+      toast.error(
+        error.response?.data?.message || 
+        'Failed to initialize payment. Please try again.'
+      );
+      alert(
+        error.response?.data?.message || 
+        'Failed to initialize payment. Please try again.'
+      );
       setLoading(false);
-      // Note: paymentProcessing is cleared in modal.ondismiss
     }
   };
-
-  // Add cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      if (paymentId) {
-        // Save failed payment ID to localStorage in case component unmounts during processing
-        localStorage.setItem('lastFailedPaymentId', paymentId);
-      }
-    };
-  }, [paymentId]);
 
   const handleHelpClick = () => {
     setShowHelpModal(true);
@@ -198,7 +150,7 @@ function Credits() {
       
       <div className="credits-container">
         <div className="credits-header">
-          <h1>Choose the plan</h1>
+          <h1>Choose Your Plan</h1>
           <p>Select a plan that works best for you</p>
           <FiHelpCircle className="help-icon" onClick={handleHelpClick} />
         </div>
@@ -209,6 +161,7 @@ function Credits() {
               key={plan.id}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.02 }}
               className={`plan-card ${selectedPlan?.id === plan.id ? 'selected' : ''}`}
               onClick={() => setSelectedPlan(plan)}
             >
@@ -225,7 +178,10 @@ function Credits() {
 
               <button 
                 className="purchase-btn"
-                onClick={() => handlePurchase(plan)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePurchase(plan);
+                }}
                 disabled={loading}
               >
                 {loading ? 'Processing...' : 'Get Started'}
@@ -234,15 +190,24 @@ function Credits() {
           ))}
         </div>
 
-        {/* Help Modal */}
         {showHelpModal && (
           <div className="modal-overlay" onClick={() => setShowHelpModal(false)}>
             <div className="help-modal" onClick={e => e.stopPropagation()}>
-              <button className="close-button" onClick={() => setShowHelpModal(false)}>×</button>
+              <button 
+                className="close-button" 
+                onClick={() => setShowHelpModal(false)}
+              >
+                ×
+              </button>
               <h2>Need Help?</h2>
-              <p>If you have paid but the credits haven't appeared, please contact us at:</p>
-              <p><strong>Email:</strong> sanjusazid0@gmail.com</p>
-              <p>Include your transaction details and transaction ID.</p>
+              <p>If you have any issues with your payment:</p>
+              <ul>
+                <li>Make sure you have sufficient balance</li>
+                <li>Check if your payment method is enabled for online transactions</li>
+                <li>If payment was deducted but credits not received, contact support with your payment ID</li>
+              </ul>
+              <p><strong>Contact Support:</strong></p>
+              <p>Email: sanjusazid@gmailcom</p>
             </div>
           </div>
         )}
